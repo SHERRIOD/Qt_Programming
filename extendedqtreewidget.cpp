@@ -1,5 +1,7 @@
 #include "extendedqtreewidget.h"
-
+#include<QDebug>
+#include<iostream>
+#include<QTreeWidgetItem>
 extendedQTreeWidget::extendedQTreeWidget(QWidget *parent) : QTreeWidget(parent)
 {
     this->clear();
@@ -25,50 +27,68 @@ QTreeWidgetItem *extendedQTreeWidget::addSubItem(QString name, QTreeWidgetItem *
     return temp;
 }
 
-void extendedQTreeWidget::TreeItemChanged(QTreeWidgetItem *item)
+void extendedQTreeWidget::TreeItemChanged(QTreeWidgetItem *item,int col)
 {
-    //QString itemText=item->text(0);
+    QString itemText=item->text(0);
+    //选中时
+    static int ii=0;
+    qDebug()<<QString("%1 time in the TreeItemChanged").arg(ii++);
     if(Qt::Checked==item->checkState(0)){
-        int cnt=item->childCount();
-        if(cnt>0){
-            for(int i=0;i<cnt;i++){
+        QTreeWidgetItem* parent=item->parent();
+        int count=item->childCount();//判断是否是子节点
+        if(count>0){
+            for(int i=0;i<count;i++){
                 item->child(i)->setCheckState(0,Qt::Checked);
             }
         }
         else{
+            //child
             updateParent(item);
         }
     }
     else{
-        int cnt=item->childCount();
-        if(cnt>0){
-            for(int i=0;i<cnt;i++){
-                item->child(i)->setCheckState(0,Qt::Unchecked);
+        if(Qt::Unchecked==item->checkState(0)){
+            int count=item->childCount();
+            if(count>0){
+                for(int i=0;i<count;i++){
+                    item->child(i)->setCheckState(0,Qt::Unchecked);
+                }
+            }
+            else{
+                updateParent(item);
             }
         }
-        else{
-            updateParent(item);
-        }
+
     }
 }
 
 void extendedQTreeWidget::updateParent(QTreeWidgetItem *item)
 {
-    if(item->parent()==NULL)  return;
-    int selectedCnt=0;
-    for(int i=0;i<item->parent()->childCount();i++){
-        if(item->parent()->child(i)->checkState(0)==Qt::Checked){
-            selectedCnt++;
+    QTreeWidgetItem* parent=item->parent();
+    if(parent==NULL){
+        return;
+    }
+    static int ii=0;
+    qDebug()<<QString("%1 time in the updateParent").arg(ii++);
+    int selectedCount=0;
+    int childCount=parent->childCount();
+    for(int i=0;i<childCount;i++){
+        QTreeWidgetItem* childItem=parent->child(i);
+        if(childItem->checkState(0)==Qt::Checked){
+            selectedCount++;
         }
     }
-    if(selectedCnt<=0){
-        item->parent()->setCheckState(0,Qt::Unchecked);
+    if(selectedCount<=0){
+        parent->setCheckState(0,Qt::Unchecked);
+
     }
-    else if(selectedCnt>0&&selectedCnt<item->parent()->childCount()){
-        item->parent()->setCheckState(0,Qt::PartiallyChecked);
+    else if(selectedCount>0&&selectedCount<childCount){
+        //部分选中
+        parent->setCheckState(0,Qt::PartiallyChecked);
     }
-    else if(selectedCnt==item->parent()->childCount()){
-        item->parent()->setCheckState(0,Qt::Checked);
+    else if(selectedCount==childCount){
+        //选中状态
+        parent->setCheckState(0,Qt::Checked);
     }
 }
 

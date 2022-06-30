@@ -11,7 +11,7 @@ public:
     explicit extendedQTreeWidget(QWidget *parent = nullptr);
     QTreeWidgetItem *addGroup(QString name);
     QTreeWidgetItem * addSubItem(QString name,QTreeWidgetItem * father);
-    void TreeItemChanged(QTreeWidgetItem* item);
+    void TreeItemChanged(QTreeWidgetItem* item,int col);
     void updateParent(QTreeWidgetItem* item);
 signals:
 
